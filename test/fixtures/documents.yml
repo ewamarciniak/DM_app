@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/Fixtures.html
+
+one:
+  project: 
+  doc_type: MyString
+  revision_number: 1
+
+two:
+  project: 
+  doc_type: MyString
+  revision_number: 1

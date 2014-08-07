@@ -1,4 +1,30 @@
 DataMapperApp::Application.routes.draw do
+  resources :documents
+
+
+  resources :legal_contracts
+
+
+  resources :projects do
+    resources :team_members
+  end
+
+
+  resources :team_members do
+    resources :projects
+  end
+
+
+  resources :clients
+
+
+  resources :companies
+
+
+  resources :addresses
+
+
+
   # The priority is based upon order of creation:
   # first created -> highest priority.
 
@@ -48,7 +74,7 @@ DataMapperApp::Application.routes.draw do
 
   # You can have the root of your site routed with "root"
   # just remember to delete public/index.html.
-  # root :to => 'welcome#index'
+  root :to => 'companies#index'
 
   # See how all your routes lay out with "rake routes"
 
