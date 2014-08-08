@@ -6,8 +6,8 @@ Perpetuity.generate_mapper_for Person do
   attribute :company, embedded: true
   attribute :profile, embedded: true
   attribute :profile_type, type: String
-  attribute :created_at, type: 'timestamp without time zone'
-  attribute :updated_at, type: 'timestamp without time zone'
+  attribute :created_at, type: Time
+  attribute :updated_at, type: Time
 
   index :profile_id
 end
