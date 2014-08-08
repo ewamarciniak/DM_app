@@ -2,7 +2,7 @@ class DocumentsController < ApplicationController
   # GET /documents
   # GET /documents.json
   def index
-    @documents = Document.all
+    @documents = Perpetuity[Document].all
 
     respond_to do |format|
       format.html # index.html.erb
@@ -13,7 +13,7 @@ class DocumentsController < ApplicationController
   # GET /documents/1
   # GET /documents/1.json
   def show
-    @document = Document.find(params[:id])
+    @document = Perpetuity[Document].find(params[:id])
 
     respond_to do |format|
       format.html # show.html.erb
@@ -34,13 +34,14 @@ class DocumentsController < ApplicationController
 
   # GET /documents/1/edit
   def edit
-    @document = Document.find(params[:id])
+    @document = Perpetuity[Document].find(params[:id])
   end
 
   # POST /documents
   # POST /documents.json
   def create
     @document = Document.new(params[:document])
+    Perpetuity[Document].insert @document
 
     respond_to do |format|
       if @document.save
@@ -56,7 +57,7 @@ class DocumentsController < ApplicationController
   # PUT /documents/1
   # PUT /documents/1.json
   def update
-    @document = Document.find(params[:id])
+    @document = Perpetuity[Document].find(params[:id])
 
     respond_to do |format|
       if @document.update_attributes(params[:document])
@@ -72,8 +73,8 @@ class DocumentsController < ApplicationController
   # DELETE /documents/1
   # DELETE /documents/1.json
   def destroy
-    @document = Document.find(params[:id])
-    @document.destroy
+    @document = Perpetuity[Document].find(params[:id])
+    Perpetuity[Document].delete @document
 
     respond_to do |format|
       format.html { redirect_to documents_url }

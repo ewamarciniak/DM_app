@@ -13,7 +13,7 @@ class TeamMembersController < ApplicationController
   # GET /team_members/1
   # GET /team_members/1.json
   def show
-    @team_member = TeamMember.find(params[:id])
+    @team_member = Perpetuity[TeamMember].find(params[:id])
 
     respond_to do |format|
       format.html # show.html.erb
@@ -35,13 +35,14 @@ class TeamMembersController < ApplicationController
 
   # GET /team_members/1/edit
   def edit
-    @team_member = TeamMember.find(params[:id])
+    @team_member = Perpetuity[TeamMember].find(params[:id])
   end
 
   # POST /team_members
   # POST /team_members.json
   def create
     @team_member = TeamMember.new(params[:team_member])
+    Perpetuity[TeamMember].insert @team_member
 
     respond_to do |format|
       if @team_member.save
@@ -57,7 +58,7 @@ class TeamMembersController < ApplicationController
   # PUT /team_members/1
   # PUT /team_members/1.json
   def update
-    @team_member = TeamMember.find(params[:id])
+    @team_member = Perpetuity[TeamMember].find(params[:id])
 
     respond_to do |format|
       if @team_member.update_attributes(params[:team_member])
@@ -73,8 +74,8 @@ class TeamMembersController < ApplicationController
   # DELETE /team_members/1
   # DELETE /team_members/1.json
   def destroy
-    @team_member = TeamMember.find(params[:id])
-    @team_member.destroy
+    @team_member = Perpetuity[TeamMember].find(params[:id])
+    Perpetuity[TeamMember].delete @team_member
 
     respond_to do |format|
       format.html { redirect_to team_members_url }

@@ -2,7 +2,7 @@ class LegalContractsController < ApplicationController
   # GET /legal_contracts
   # GET /legal_contracts.json
   def index
-    @legal_contracts = LegalContract.all
+    @legal_contracts = Perpetuity[LegalContract].all
 
     respond_to do |format|
       format.html # index.html.erb
@@ -13,7 +13,7 @@ class LegalContractsController < ApplicationController
   # GET /legal_contracts/1
   # GET /legal_contracts/1.json
   def show
-    @legal_contract = LegalContract.find(params[:id])
+    @legal_contract = Perpetuity[LegalContract].find(params[:id])
 
     respond_to do |format|
       format.html # show.html.erb
@@ -34,13 +34,14 @@ class LegalContractsController < ApplicationController
 
   # GET /legal_contracts/1/edit
   def edit
-    @legal_contract = LegalContract.find(params[:id])
+    @legal_contract = Perpetuity[LegalContract].find(params[:id])
   end
 
   # POST /legal_contracts
   # POST /legal_contracts.json
   def create
     @legal_contract = LegalContract.new(params[:legal_contract])
+    Perpetuity[LegalContract].insert @legal_contract
 
     respond_to do |format|
       if @legal_contract.save
@@ -56,7 +57,7 @@ class LegalContractsController < ApplicationController
   # PUT /legal_contracts/1
   # PUT /legal_contracts/1.json
   def update
-    @legal_contract = LegalContract.find(params[:id])
+    @legal_contract = Perpetuity[LegalContract].find(params[:id])
 
     respond_to do |format|
       if @legal_contract.update_attributes(params[:legal_contract])
@@ -72,8 +73,8 @@ class LegalContractsController < ApplicationController
   # DELETE /legal_contracts/1
   # DELETE /legal_contracts/1.json
   def destroy
-    @legal_contract = LegalContract.find(params[:id])
-    @legal_contract.destroy
+    @legal_contract = Perpetuity[LegalContract].find(params[:id])
+    Perpetuity[LegalContract].delete @legal_contract
 
     respond_to do |format|
       format.html { redirect_to legal_contracts_url }

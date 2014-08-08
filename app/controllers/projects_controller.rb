@@ -5,7 +5,7 @@ class ProjectsController < ApplicationController
     if params[:team_member_id]
       @projects = TeamMember.find(params[:team_member_id]).projects
     else
-      @projects = Project.find(:all)
+      @projects = Perpetuity[Project].all
     end
 
     respond_to do |format|
@@ -17,7 +17,7 @@ class ProjectsController < ApplicationController
   # GET /projects/1
   # GET /projects/1.json
   def show
-    @project = Project.find(params[:id])
+    @project = Perpetuity[Project].find(params[:id])
 
     respond_to do |format|
       format.html # show.html.erb
@@ -38,13 +38,14 @@ class ProjectsController < ApplicationController
 
   # GET /projects/1/edit
   def edit
-    @project = Project.find(params[:id])
+    @project = Perpetuity[Project].find(params[:id])
   end
 
   # POST /projects
   # POST /projects.json
   def create
     @project = Project.new(params[:project])
+    Perpetuity[Project].insert @project
 
     respond_to do |format|
       if @project.save
@@ -60,7 +61,7 @@ class ProjectsController < ApplicationController
   # PUT /projects/1
   # PUT /projects/1.json
   def update
-    @project = Project.find(params[:id])
+    @project = Perpetuity[Project].find(params[:id])
 
     respond_to do |format|
       if @project.update_attributes(params[:project])
@@ -76,8 +77,8 @@ class ProjectsController < ApplicationController
   # DELETE /projects/1
   # DELETE /projects/1.json
   def destroy
-    @project = Project.find(params[:id])
-    @project.destroy
+    @project = Perpetuity[Project].find(params[:id])
+    Perpetuity[Project].delete @project
 
     respond_to do |format|
       format.html { redirect_to projects_url }

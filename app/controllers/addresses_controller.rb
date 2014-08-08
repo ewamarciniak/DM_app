@@ -2,7 +2,6 @@ class AddressesController < ApplicationController
   # GET /addresses
   # GET /addresses.json
   def index
-    #require 'debugger'; debugger
     @addresses = Perpetuity[Address].all
 
     respond_to do |format|
@@ -35,6 +34,7 @@ class AddressesController < ApplicationController
 
   # GET /addresses/1/edit
   def edit
+    #require 'debugger'; debugger
     @address = Perpetuity[Address].find(params[:id])
   end
 
