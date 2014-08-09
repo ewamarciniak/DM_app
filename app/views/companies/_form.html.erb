@@ -1,5 +1,5 @@
 <%= form_for(@company) do |f| %>
-    <% if @company.errors.any? %>
+    <% if @company.errors.to_a.any? %>
         <div id="error_explanation">
           <h2><%= pluralize(@company.errors.count, "error") %> prohibited this company from being saved:</h2>
 
@@ -47,7 +47,7 @@
         <%= f.label :address, class: "right inline" %>
       </div>
       <div class="small-7 columns left">
-        <%= f.collection_select(:address_id, Address.all, :id, :full_address, {include_blank: true, :data => {:placeholder => "Select address"}}, {:class => "chosen-select", :tabindex => "-1", :style => "width:350px;", }) %>
+        <%= f.collection_select(:address, Perpetuity[Address].all.to_a, :id, :full_address, {include_blank: true, :data => {:placeholder => "Select address"}}, {:class => "chosen-select", :tabindex => "-1", :style => "width:350px;", }) %>
 
       </div>
     </div>

@@ -1,25 +1,7 @@
 class Address
   include Perpetuity::RailsModel
 
-  def errors
-    @errors ||= ActiveModel::Errors.new(self)
-  end
-
-  def read_attribute_for_validation(attr)
-    send(attr)
-  end
-
-  def save
-    validate!
-    errors.empty? ? super : false
-  end
-
-  def validate!
-    #place custom validations here e.g.
-    errors.add(:name, "cannot be blank.") if self.name = ""
-    errors.add(:number,"must be less than 7.") if self.number >= 7
-  end
-  attr_accessor :name, :city, :county, :line1, :line2, :postcode
+  attr_accessor :name, :city, :county, :line1, :line2, :postcode, :id, :created_at, :updated_at
   attr_reader   :errors
 
   POSTCODES =["1","2","3","4","5","6", "6W","7","8","9","10","11","12","13","14","15","16","17","18","20","22","24"]

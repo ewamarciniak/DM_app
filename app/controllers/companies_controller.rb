@@ -2,7 +2,10 @@ class CompaniesController < ApplicationController
   # GET /companies
   # GET /companies.json
   def index
-    @companies = Perpetuity[Company].all
+    require 'debugger'; debugger
+    company_mapper = Perpetuity[Company]
+    @companies = company_mapper.all.to_a
+    company_mapper.load_association! @companies, :address
 
     respond_to do |format|
       format.html # index.html.erb
@@ -25,7 +28,7 @@ class CompaniesController < ApplicationController
   # GET /companies/new.json
   def new
     @company = Company.new
-    @company.build_address
+    #@company.build_address
 
     respond_to do |format|
       format.html # new.html.erb

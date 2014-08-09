@@ -1,4 +1,5 @@
 Perpetuity.generate_mapper_for Document do
+
   attribute :project, embedded: true
   attribute :doc_type, type: String
   attribute :doc_name, type: String
