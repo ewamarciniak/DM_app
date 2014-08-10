@@ -45,6 +45,53 @@ i = Document.new
 Perpetuity[Document].insert i
 Perpetuity[Document].delete i
 
+
+address_inserts = []
+
+CSV.foreach("script/addresses.csv") do  |row|
+  line1 = row[0].strip
+  line2 = row[1] unless row[1]=='nil'
+  postcode = row[2] unless row[2]=='nil'
+  city = row[3]
+  county = row[4]
+
+  address_inserts << "('#{line1}', "+ (line2 ? "'#{line2}'" : "null") + ", " + (postcode ? "'#{postcode}'" : "null") +
+      ", '#{city}', '#{county}', now(), now())"
+end
+#require 'debugger'; debugger
+unless address_inserts.empty?
+  Perpetuity.data_source.connection.execute("INSERT INTO \"Address\" (line1, line2,\
+postcode, city, county, created_at, updated_at) VALUES #{address_inserts.join(', ')}")
+  #print "INSERT INTO addresses (line1, line2, postcode, city, county,created_at, updated_at) VALUES #{address_inserts.join(", ")}"
+end
+puts "________________________________________________________________________"
+puts "adresses done"
+
+address_ids = Perpetuity[Address].all.to_a
+
+CSV.foreach("script/companies.csv") do  |row|
+  company_name = row[0].strip
+  fax_number = row[1] unless row[1]=='nil'
+  phone_number = row[2] unless row[2]=='nil'
+  reg_number = row[3]
+  a = address_ids.pop
+
+  b = Company.new
+  b.address = a
+  b.company_name = company_name
+  b.fax_number = fax_number
+  b.phone_number = phone_number
+  b.reg_number = reg_number
+  b.created_at = Time.now
+  b.updated_at = Time.now
+  b.address.created_at = b.address.created_at.to_s
+  b.address.updated_at = b.address.updated_at.to_s
+  Perpetuity[Company].insert b
+end
+
+puts "________________________________________________________________________"
+puts "companies done"
+
   #projects
 
   CSV.foreach("script/projects.csv") do  |row|
@@ -124,12 +171,7 @@ Perpetuity[Document].delete i
   index_num = 0
   CSV.foreach("script/legal_contracts.csv") do  |row|
     contract = LegalContract.new
-
-    require 'debugger'; debugger
     contract.project = project_ids[index_num]
-    #contract.project.created_at = contract.project.created_at.to_time
-    #contract.project.updated_at = contract.project.updated_at.to_time
-   # contract.project.delivery_deadline = contract.project.delivery_deadline.to_time
     index_num += 1
     contract.signed_on = row[0].strip
     contract.revised_on = row[1]

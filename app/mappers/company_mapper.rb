@@ -3,8 +3,8 @@ Perpetuity.generate_mapper_for Company do
   attribute :reg_number, type: String
   attribute :phone_number, type: String
   attribute :fax_number, type: String
-  attribute :address, embedded: true
+  attribute :address
   attribute :created_at, type: Time
   attribute :updated_at, type: Time
-  index :address_id
+  index :address
 end

@@ -1,6 +1,6 @@
 Perpetuity.generate_mapper_for LegalContract do
 
-  attribute :project, embedded: true
+  attribute :project
   attribute :title, type: String
   attribute :signed_on, type: Time
   attribute :revised_on, type: Time
