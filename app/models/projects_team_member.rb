@@ -1,3 +1,3 @@
 class ProjectsTeamMember
-  # attr_accessible :title, :body
+  attr_accessor :project, :team_member
 end

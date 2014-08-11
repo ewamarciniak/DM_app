@@ -8,5 +8,5 @@ Perpetuity.generate_mapper_for LegalContract do
   attribute :created_at, type: Time
   attribute :updated_at, type: Time
 
-  index :project_id
+  index :project
 end

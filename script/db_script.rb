@@ -40,10 +40,13 @@ h = TeamMember.new
 Perpetuity[TeamMember].insert h
 Perpetuity[TeamMember].delete h
 
-
 i = Document.new
 Perpetuity[Document].insert i
 Perpetuity[Document].delete i
+
+j = ProjectsTeamMember.new
+Perpetuity[ProjectsTeamMember].insert j
+Perpetuity[ProjectsTeamMember].delete j
 
 
 address_inserts = []
@@ -109,6 +112,25 @@ puts "companies done"
   puts "________________________________________________________________________"
   puts "projects done"
 
+  #legal contracts
+  project_ids = Perpetuity[Project].all.to_a
+  index_num = 0
+  CSV.foreach("script/legal_contracts.csv") do  |row|
+    contract = LegalContract.new
+    contract.project = project_ids[index_num]
+    index_num += 1
+    contract.signed_on = row[0].strip
+    contract.revised_on = row[1]
+    contract.created_at = Time.now
+    contract.updated_at = Time.now
+    contract.copy_stored = row[2]
+    contract.title = row[3]
+    Perpetuity[LegalContract].insert contract
+  end
+
+  puts "________________________________________________________________________"
+  puts "contracts done"
+
 
   #documents
  random_indexes=[76, 104, 67, 35, 94, 165, 80, 134, 77, 127, 68, 27, 38, 142, 61, 22, 85, 25, 28, 68, 78, 137, 169, 115, 52, 69, 38, 64, 168, 170, 1,
@@ -145,6 +167,8 @@ puts "companies done"
                  28, 23, 140, 141, 59, 196, 25, 152, 18, 191, 195, 190, 151, 118, 172, 173, 132, 88, 143, 82, 51, 75, 142, 55, 62, 136, 145, 117, 114, 170, 66,
                  59, 164, 23, 49, 86, 51, 190, 3, 6, 191, 115, 88, 169, 161, 69, 104, 35]
   projects = Perpetuity[Project].all.to_a
+  legal_contracts = Perpetuity[LegalContract].all.to_a
+  indexes = [10, 22, 34, 67, 43, 0, 20, 11, 54, 27]
   index_num = 0
   CSV.foreach("script/documents.csv") do  |row|
 
@@ -160,27 +184,62 @@ puts "companies done"
     doc.updated_at = Time.now
 
     Perpetuity[Document].insert doc
+    if index_num%100==0
+      doc.contract_id = legal_contracts[indexes.pop].id
+    else
+      doc.contract_id = "N/A"
+    end
+    Perpetuity[Document].save doc
   end
 
   puts "________________________________________________________________________"
   puts "documents done"
 
 
-  #legal contracts
-  project_ids = Perpetuity[Project].all.to_a
-  index_num = 0
-  CSV.foreach("script/legal_contracts.csv") do  |row|
-    contract = LegalContract.new
-    contract.project = project_ids[index_num]
-    index_num += 1
-    contract.signed_on = row[0].strip
-    contract.revised_on = row[1]
-    contract.created_at = Time.now
-    contract.updated_at = Time.now
-    contract.copy_stored = row[2]
-    contract.title = row[3]
-    Perpetuity[LegalContract].insert contract
+
+  #now insert team_members and people
+
+  CSV.foreach("script/team_members.csv") do  |row|
+    team_member = TeamMember.new
+    team_member.team = row[4]
+    team_member.experience_level = row[5]
+    team_member.qualification = row[6]
+    team_member.lead = row[7]
+    team_member.created_at = Time.now
+    team_member.updated_at = Time.now
+    Perpetuity[TeamMember].insert team_member
+
+    person = Person.new
+    person.first_name = row[0].strip
+    person.last_name = row[1]
+    person.phone_number = row[2]
+    person.email = row[3]
+    companies = Perpetuity[Company].all.to_a
+
+    person.company = companies.pop
+    person.profile = team_member
+    person.created_at = Time.now
+    person.updated_at = Time.now
+    Perpetuity[Person].insert person
   end
 
   puts "________________________________________________________________________"
-  puts "contracts done"
+  puts "team members done"
+
+
+ #projectsteammembers
+  projs= Perpetuity[Project].all.to_a
+  team_members = Perpetuity[TeamMember].all.to_a
+  num_of_team_members = {"400000" => 1, "500000" => 2, "600000" => 3, "700000" => 4, "800000" => 4, "900000" => 4,
+                       "1000000" => 5, "2000000" => 7, "3000000" => 9}
+
+  projs.each do |proj|
+    budget = proj.budget.to_i.to_s
+
+    (num_of_team_members["#{budget}"] || 1).times do
+      tm = ProjectsTeamMember.new
+      tm.project = proj
+      tm.team_member = team_members.pop
+      Perpetuity[ProjectsTeamMember].insert tm
+    end
+  end

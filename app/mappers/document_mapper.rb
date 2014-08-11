@@ -1,6 +1,7 @@
 Perpetuity.generate_mapper_for Document do
 
   attribute :project
+  attribute :contract_id, type: String
   attribute :doc_type, type: String
   attribute :doc_name, type: String
   attribute :revision_number, type: Integer

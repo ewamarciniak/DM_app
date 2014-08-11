@@ -7,10 +7,12 @@ require 'csv'
 require './config/environment.rb'
 require 'date'
 require 'time'
+require 'benchmark'
 
 DB_YML = "./config/database.yml"
 
 Perpetuity.data_source :postgres, 'data_mapper_app_development'
+#Perpetuity.logger = Logger.new(STDOUT)
 #TRAVERSALS
 
 #T1: Raw traversal speed************************************************************************************************
@@ -156,9 +158,6 @@ end
 #Choose a range for dates that will contain the last 1% of the dates found in the database's Documents. Retrieve the
 #Documents that satisfy this range predicate.
 def query_2
-  #documents = Perpetuity[Document].all.find(:conditions =>
-   #                            ["revision_date > :start_date AND revision_date <= :end_date", {
-   #                                :start_date => '2014-03-29', :end_date => '2014-08-05' }])
   start_date = '2014-03-29'
   end_date = '2014-08-05'
   documents = Perpetuity[Document].select { |document| document.revision_date > start_date}.select { |document| document.revision_date < end_date}
@@ -169,12 +168,7 @@ end
 #Query Q3***************************************************************************************************************
 #Choose a range for dates that will contain the last 10% of the dates found in the database's Documents. Retrieve the
 # Documents that satisfy this range predicate.
-
-
 def query_3
-  #documents = Perpetuity[Document].find(:conditions =>
-  #               ["revision_date >= :start_date AND revision_date <= :end_date", {
-  #                   :start_date => '2014-01-10', :end_date => '2014-01-20' }])
   start_date = '2014-01-10'
   end_date = '2014-01-20'
   documents = Perpetuity[Document].select { |document| document.revision_date > start_date}.select { |document| document.revision_date < end_date}
@@ -187,10 +181,16 @@ end
 
 def query_4
   team_members_num = 0
+  team_members =[]
   contracts = Perpetuity[LegalContract].all.to_a
+  Perpetuity[LegalContract].load_association! contracts, :project
+  projects = Perpetuity[Project].all.to_a
+  Perpetuity[Project].load_association! projects, :projects_team_members
+  proj_team_members = Perpetuity[ProjectsTeamMember].all.to_a
+  Perpetuity[ProjectsTeamMember].load_association! proj_team_members, :team_members
   contracts.each do |contract|
-    projects_team_members = contract.project.team_members.all.to_a
-    team_members_num += projects_team_members.size
+    ptms = Perpetuity[ProjectsTeamMember].select {|ptm| ptm.project.id == contract.project.id }.to_a
+    team_members_num += ptms.size
   end
   return team_members_num
 end
@@ -202,13 +202,18 @@ def query_5
   relevant_team_members = []
   all_projects = Perpetuity[Project].all.to_a
   all_projects.each do |proj|
-    proj_date = proj.created_at
-    proj.team_members.each do |tm|
-      if tm.created_at > proj_date
-        relevant_team_members << tm
+    ptms = Perpetuity[ProjectsTeamMember].select {|ptm| ptm.project.id == proj.id }.to_a
+    Perpetuity[ProjectsTeamMember].load_association! ptms, :team_member
+    Perpetuity[ProjectsTeamMember].load_association! ptms, :project
+
+    ptms.each do |pt|
+      tm_created_at = pt.team_member.created_at
+      pt_created_at =  pt.project.created_at
+
+      if tm_created_at < pt_created_at
+        relevant_team_members << pt.team_member
       end
     end
-  puts relevant_team_members.join(', ') unless relevant_team_members.empty?
     return relevant_team_members.size
   end
 end
@@ -221,7 +226,8 @@ def query_7
   documents.each do |doc|
     document_ids << doc.id
   end
-  return document_ids.join(', ')
+  #puts document_ids.join(', ')
+  return document_ids.size
 
 end
 
@@ -230,8 +236,19 @@ end
 #legal_contract. Also, return a count of the number of such pairs encountered.
 
 def query_8
-  #join???
-  #Project.includes(:legal_contract, :document)
+#no joins available
+ contracts = Perpetuity[LegalContract].all.to_a
+ documents = Perpetuity[Document].all.to_a
+ Perpetuity[LegalContract].load_association! contracts, :project
+  all_relevant_docs = []
+  all_relevant_docs_count = 0
+  contracts.each do |contract|
+    pairs = Perpetuity[Document].select {|doc| doc.contract_id == contract.id }
+    all_relevant_docs << pairs
+    all_relevant_docs_count +=pairs.to_a.count
+    #require 'debugger'; debugger
+  end
+  return all_relevant_docs_count
 end
 #STRUCTURAL MODIFICATIONS
 
@@ -301,6 +318,7 @@ def modification_2_deletion
 
     Perpetuity[Project].delete project
   end
+
  return "deleted"
 end
 
@@ -308,11 +326,32 @@ end
 #puts traversal_2a
 #puts traversal_2b
 #puts traversal_2c
-puts query_1
-puts query_2
-puts query_3
-#puts query_4
-#puts query_5
-puts query_7
-puts modification_1_insert
-puts modification_2_deletion
+Benchmark.bm do |x|
+  x.report("DataMapper#query_1 \n") do
+    puts query_1
+  end
+  x.report("DataMapper#query_2 \n") do
+    query_2
+  end
+  x.report("DataMapper#query_3 \n") do
+    query_3
+  end
+  x.report("DataMapper#query_4 \n") do
+    query_4
+  end
+  x.report("DataMapper#query_5 \n") do
+    query_5
+  end
+  x.report("DataMapper#query_7 \n") do
+    query_7
+  end
+  x.report("DataMapper#query_8 \n") do
+    query_8
+  end
+  x.report("DataMapper#modification_insert \n") do
+    modification_1_insert
+  end
+  x.report("DataMapper#modification_deletion \n") do
+    modification_2_deletion
+  end
+end

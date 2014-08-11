@@ -67,6 +67,7 @@ GEM
     perpetuity-postgres (0.0.5)
       perpetuity (~> 1.0.0.beta5)
       pg
+    pg (0.17.1)
     pg (0.17.1-x86-mingw32)
     polyglot (0.3.5)
     rack (1.4.5)
