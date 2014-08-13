@@ -166,8 +166,9 @@ puts "companies done"
                  109, 186, 94, 150, 192, 64, 36, 148, 187, 121, 87, 90, 181, 164, 102, 16, 69, 157, 10, 19, 192, 68, 145, 117, 154, 151, 163, 20, 10, 52, 10,
                  28, 23, 140, 141, 59, 196, 25, 152, 18, 191, 195, 190, 151, 118, 172, 173, 132, 88, 143, 82, 51, 75, 142, 55, 62, 136, 145, 117, 114, 170, 66,
                  59, 164, 23, 49, 86, 51, 190, 3, 6, 191, 115, 88, 169, 161, 69, 104, 35]
-  projects = Perpetuity[Project].all.to_a
-  legal_contracts = Perpetuity[LegalContract].all.to_a
+  projects = Perpetuity[Project].all.sort(:created_at).to_a
+
+  legal_contracts = Perpetuity[LegalContract].all.sort(:created_at).to_a
   indexes = [10, 22, 34, 67, 43, 0, 20, 11, 54, 27]
   index_num = 0
   CSV.foreach("script/documents.csv") do  |row|
@@ -217,6 +218,7 @@ puts "companies done"
     companies = Perpetuity[Company].all.to_a
 
     person.company = companies.pop
+    person.profile_type = "TeamMember"
     person.profile = team_member
     person.created_at = Time.now
     person.updated_at = Time.now
@@ -229,7 +231,8 @@ puts "companies done"
 
  #projectsteammembers
   projs= Perpetuity[Project].all.to_a
-  team_members = Perpetuity[TeamMember].all.to_a
+
+  team_members = []
   num_of_team_members = {"400000" => 1, "500000" => 2, "600000" => 3, "700000" => 4, "800000" => 4, "900000" => 4,
                        "1000000" => 5, "2000000" => 7, "3000000" => 9}
 
@@ -239,7 +242,11 @@ puts "companies done"
     (num_of_team_members["#{budget}"] || 1).times do
       tm = ProjectsTeamMember.new
       tm.project = proj
+      if team_members.empty?
+        team_members = Perpetuity[TeamMember].all.sort(:created_at).to_a
+      end
       tm.team_member = team_members.pop
+
       Perpetuity[ProjectsTeamMember].insert tm
     end
   end

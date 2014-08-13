@@ -5,6 +5,7 @@ Perpetuity.generate_mapper_for Person do
   attribute :email, type: String
   attribute :company
   attribute :profile
+  attribute :profile_type, type: String
   attribute :created_at, type: Time
   attribute :updated_at, type: Time
 

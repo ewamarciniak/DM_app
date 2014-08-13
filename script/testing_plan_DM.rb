@@ -20,21 +20,27 @@ Perpetuity.data_source :postgres, 'data_mapper_app_development'
 # project is visited, perform a depth first search on its graph of documents. Return a count of the number of documents
 # visited when done./NO DEPTH FIRST SEARCH
 def traversal_1
-  all_people = Person.where(:profile_type => "TeamMember")
+
+  all_people = Perpetuity[Person].select {|person| person.profile_type == "TeamMember" }.to_a
   docs = 0
   all_people.each do |person|
-    team_member = TeamMember.find(person.profile_id)
-    team_member.projects.each do |project|
-      documents = Document.where(:project_id => project.id)
+    projects = []
+    team_member = Perpetuity[TeamMember].find(person.profile.id)
+    projects_team_members = Perpetuity[ProjectsTeamMember].select {|ptm| ptm.team_member.id == team_member.id}.to_a
+    Perpetuity[ProjectsTeamMember].load_association! projects_team_members, :projects
+
+    projects_team_members.each do |projtm|
+      projects << projtm.project
+    end
+    projects.each do |project|
+      documents = Perpetuity[Document].select {|document| document.project.id == project.id }.to_a
       documents.each do |doc|
         #visiting instead of returning the size
         docs += 1
       end
     end
   end
-
   return docs
-  #might have to return
 end
 
 #Traversal T2: Traversal with updates***********************************************************************************
@@ -46,72 +52,94 @@ end
 #C)	Update each document in a project four times
 
 def traversal_2a
-  all_people = Person.where(:profile_type => "TeamMember")
-  docs = 0
+  all_people = Perpetuity[Person].select {|person| person.profile_type == "TeamMember" }.to_a
+  doc_num = 0
   all_people.each do |person|
-    team_member = TeamMember.find(person.profile_id)
-    team_member.projects.each do |project|
-      doc_num = 0
-      documents = Document.where(:project_id => project.id)
+    projects = []
+    team_member = Perpetuity[TeamMember].find(person.profile.id)
+    projects_team_members = Perpetuity[ProjectsTeamMember].select {|ptm| ptm.team_member.id == team_member.id}.to_a
+    Perpetuity[ProjectsTeamMember].load_association! projects_team_members, :projects
+
+    projects_team_members.each do |projtm|
+      projects << projtm.project
+    end
+    projects.each do |project|
+      doc_index = 0
+      documents = Perpetuity[Document].select {|document| document.project.id == project.id }.to_a
       documents.each do |doc|
         #visiting instead of returning the size
-        docs+=1
         doc_num += 1
-        if doc_num == 1
+        if doc_index == 0
           type = doc.doc_type
           name = doc.doc_name
           doc.doc_type = name
           doc.doc_name = type
-          doc.save!
+          Perpetuity[Document].save doc
         end
+        doc_index +=1
       end
     end
   end
-  return docs
+  return doc_num
 end
 
 def traversal_2b
-  all_people = Person.where(:profile_type => "TeamMember")
-  docs = 0
+  all_people = Perpetuity[Person].select {|person| person.profile_type == "TeamMember" }.to_a
+  doc_num = 0
   all_people.each do |person|
-    team_member = TeamMember.find(person.profile_id)
-    team_member.projects.each do |project|
-      documents = Document.where(:project_id => project.id)
+    projects = []
+    team_member = Perpetuity[TeamMember].find(person.profile.id)
+    projects_team_members = Perpetuity[ProjectsTeamMember].select {|ptm| ptm.team_member.id == team_member.id}.to_a
+    Perpetuity[ProjectsTeamMember].load_association! projects_team_members, :projects
+
+    projects_team_members.each do |projtm|
+      projects << projtm.project
+    end
+    projects.each do |project|
+      documents = Perpetuity[Document].select {|document| document.project.id == project.id }.to_a
       documents.each do |doc|
         #visiting instead of returning the size
-        docs+=1
+        doc_num += 1
         type = doc.doc_type
         name = doc.doc_name
         doc.doc_type = name
         doc.doc_name = type
-        doc.save
+        Perpetuity[Document].save doc
       end
     end
   end
-  return docs
+  return doc_num
 end
 
 def traversal_2c
-  all_people = Person.where(:profile_type => "TeamMember")
-  docs = 0
+
+  all_people = Perpetuity[Person].select {|person| person.profile_type == "TeamMember" }.to_a
+  doc_num = 0
   all_people.each do |person|
-    team_member = TeamMember.find(person.profile_id)
-    team_member.projects.each do |project|
-      documents = Document.where(:project_id => project.id)
+    projects = []
+    team_member = Perpetuity[TeamMember].find(person.profile.id)
+    projects_team_members = Perpetuity[ProjectsTeamMember].select {|ptm| ptm.team_member.id == team_member.id}.to_a
+    Perpetuity[ProjectsTeamMember].load_association! projects_team_members, :projects
+
+    projects_team_members.each do |projtm|
+      projects << projtm.project
+    end
+    projects.each do |project|
+      documents = Perpetuity[Document].select {|document| document.project.id == project.id }.to_a
       documents.each do |doc|
         #visiting instead of returning the size
-        docs+=1
+        doc_num += 1
         type = doc.doc_type
         name = doc.doc_name
         doc.doc_type = name
         doc.doc_name = type
         4.times do
-          doc.save!
+          Perpetuity[Document].save doc
         end
       end
     end
   end
-  return docs
+  return doc_num
 end
 
 
@@ -327,6 +355,18 @@ end
 #puts traversal_2b
 #puts traversal_2c
 Benchmark.bm do |x|
+  x.report("DataMapper#traversal_1 \n") do
+    puts traversal_1
+  end
+  x.report("DataMapper#traversal_2a \n") do
+    puts traversal_2a
+  end
+  x.report("DataMapper#traversal_2b \n") do
+    puts traversal_2b
+  end
+  x.report("DataMapper#traversal_2c \n") do
+    puts traversal_2c
+  end
   x.report("DataMapper#query_1 \n") do
     puts query_1
   end
@@ -354,4 +394,5 @@ Benchmark.bm do |x|
   x.report("DataMapper#modification_deletion \n") do
     modification_2_deletion
   end
+
 end

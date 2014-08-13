@@ -12,6 +12,8 @@ gem 'perpetuity-postgres'
 gem 'jquery-ui-rails'
 gem 'jquery-rails'
 gem 'debugger'
+gem 'ruby-prof', group: :test
+gem 'test-unit', group: :test
 
 # Gems used only for assets and not required
 # in production environments by default.
