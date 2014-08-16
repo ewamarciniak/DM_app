@@ -147,6 +147,8 @@ end
 #Repeat Traversal T2, except that now the update is on the date field, which is indexed. The specific update is to
 # increment the date if it is odd, and decrement the date if it is even.
 
+
+
 #Traversal T6: Sparse traversal speed***********************************************************************************
 #Traverse the person hierarchy. As each team member is visited, visit each of its referenced unshared projects. As each
 # project is visited, visit the root document Return a count of the number of documents visited when done.
@@ -154,9 +156,25 @@ end
 #Traversals T8 and T9: Operations on Manual.
 #Traversal T8***********************************************************************************************************
 #Scans the address object, counting the number of occurrences of the character “I.”
+def traversal_8
+  num_occurances = 0
+  Perpetuity[Address].all.to_a.each do |address|
+     full_ad = address.line1 + ' '  + (address.line2 || '') + ' '  + address.city + address.county
+     occurance = full_ad.downcase.scan(/i/).size
+     num_occurances += occurance
+  end
+  return num_occurances
+end
 
 #Traversal T9***********************************************************************************************************
 #Checks to see if the first and last character in the address object are the same.
+def traversal_9
+  num_occurances = 0
+  Perpetuity[Address].all.to_a.each do |address|
+    num_occurances += 1 if address.city.downcase.split('').first == address.city.downcase.split('').last
+  end
+  return num_occurances
+end
 
 
 #QUERIES
@@ -355,44 +373,11 @@ end
 #puts traversal_2b
 #puts traversal_2c
 Benchmark.bm do |x|
-  x.report("DataMapper#traversal_1 \n") do
-    puts traversal_1
+  x.report("DataMapper#traversal_8 \n") do
+    puts traversal_8
   end
-  x.report("DataMapper#traversal_2a \n") do
-    puts traversal_2a
-  end
-  x.report("DataMapper#traversal_2b \n") do
-    puts traversal_2b
-  end
-  x.report("DataMapper#traversal_2c \n") do
-    puts traversal_2c
-  end
-  x.report("DataMapper#query_1 \n") do
-    puts query_1
-  end
-  x.report("DataMapper#query_2 \n") do
-    puts query_2
-  end
-  x.report("DataMapper#query_3 \n") do
-    puts query_3
-  end
-  x.report("DataMapper#query_4 \n") do
-    puts query_4
-  end
-  x.report("DataMapper#query_5 \n") do
-    puts query_5
-  end
-  x.report("DataMapper#query_7 \n") do
-    puts query_7
-  end
-  x.report("DataMapper#query_8 \n") do
-    puts query_8
-  end
-  x.report("DataMapper#modification_insert \n") do
-    puts modification_1_insert
-  end
-  x.report("DataMapper#modification_deletion \n") do
-    puts modification_2_deletion
+  x.report("DataMapper#traversal_9 \n") do
+    puts traversal_9
   end
 
 end
