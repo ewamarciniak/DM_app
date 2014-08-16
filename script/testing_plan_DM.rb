@@ -371,28 +371,28 @@ Benchmark.bm do |x|
     puts query_1
   end
   x.report("DataMapper#query_2 \n") do
-    query_2
+    puts query_2
   end
   x.report("DataMapper#query_3 \n") do
-    query_3
+    puts query_3
   end
   x.report("DataMapper#query_4 \n") do
-    query_4
+    puts query_4
   end
   x.report("DataMapper#query_5 \n") do
-    query_5
+    puts query_5
   end
   x.report("DataMapper#query_7 \n") do
-    query_7
+    puts query_7
   end
   x.report("DataMapper#query_8 \n") do
-    query_8
+    puts query_8
   end
   x.report("DataMapper#modification_insert \n") do
-    modification_1_insert
+    puts modification_1_insert
   end
   x.report("DataMapper#modification_deletion \n") do
-    modification_2_deletion
+    puts modification_2_deletion
   end
 
 end
