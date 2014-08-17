@@ -10,4 +10,5 @@ Perpetuity.generate_mapper_for Document do
   attribute :updated_at, type: Time
 
   index :project
+  index :revision_date
 end

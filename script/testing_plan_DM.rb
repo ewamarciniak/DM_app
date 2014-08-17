@@ -146,8 +146,33 @@ end
 #Traversal T3: Traversal with indexed field updates*********************************************************************
 #Repeat Traversal T2, except that now the update is on the date field, which is indexed. The specific update is to
 # increment the date if it is odd, and decrement the date if it is even.
+def traversal_3
+  all_people = Perpetuity[Person].select {|person| person.profile_type == "TeamMember" }.to_a
+  doc_num = 0
+  all_people.each do |person|
+    projects = []
+    team_member = Perpetuity[TeamMember].find(person.profile.id)
+    projects_team_members = Perpetuity[ProjectsTeamMember].select {|ptm| ptm.team_member.id == team_member.id}.to_a
+    Perpetuity[ProjectsTeamMember].load_association! projects_team_members, :projects
 
-
+    projects_team_members.each do |projtm|
+      projects << projtm.project
+    end
+    projects.each do |project|
+      documents = Perpetuity[Document].select {|document| document.project.id == project.id }.to_a
+      documents.each do |doc|
+        #visiting instead of returning the size
+        doc_num += 1
+        type = doc.doc_type
+        name = doc.doc_name
+        doc.doc_type = name
+        doc.doc_name = type
+        Perpetuity[Document].save doc
+      end
+    end
+  end
+  return doc_num
+end
 
 #Traversal T6: Sparse traversal speed***********************************************************************************
 #Traverse the person hierarchy. As each team member is visited, visit each of its referenced unshared projects. As each
@@ -373,6 +398,10 @@ end
 #puts traversal_2b
 #puts traversal_2c
 Benchmark.bm do |x|
+
+  x.report("DataMapper#traversal_3 \n") do
+    puts traversal_3
+  end
   x.report("DataMapper#traversal_8 \n") do
     puts traversal_8
   end

@@ -34,6 +34,4 @@ DataMapperApp::Application.configure do
 
   # Expands the lines which load the assets
   config.assets.debug = true
-
-  Perpetuity.data_source :postgres, 'data_mapper_app_development'
 end
