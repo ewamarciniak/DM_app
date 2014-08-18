@@ -15,47 +15,38 @@ Perpetuity.data_source :postgres, 'data_mapper_app_development'
 a = Address.new
 Perpetuity[Address].insert a
 Perpetuity[Address].delete a
-Perpetuity[Address].reindex!
 
 b = Company.new
 Perpetuity[Company].insert b
 Perpetuity[Company].delete b
-Perpetuity[Company].reindex!
 
 c = Client.new
 Perpetuity[Client].insert c
 Perpetuity[Client].delete c
-Perpetuity[Client].reindex!
 
 e = LegalContract.new
 Perpetuity[LegalContract].insert e
 Perpetuity[LegalContract].delete e
-Perpetuity[LegalContract].reindex!
 
 f = Person.new
 Perpetuity[Person].insert f
 Perpetuity[Person].delete f
-Perpetuity[Person].reindex!
 
 g = Project.new
 Perpetuity[Project].insert g
 Perpetuity[Project].delete g
-Perpetuity[Project].reindex!
 
 h = TeamMember.new
 Perpetuity[TeamMember].insert h
 Perpetuity[TeamMember].delete h
-Perpetuity[TeamMember].reindex!
 
 i = Document.new
 Perpetuity[Document].insert i
 Perpetuity[Document].delete i
-Perpetuity[Document].reindex!
 
 j = ProjectsTeamMember.new
 Perpetuity[ProjectsTeamMember].insert j
 Perpetuity[ProjectsTeamMember].delete j
-Perpetuity[ProjectsTeamMember].reindex!
 
 
 address_inserts = []

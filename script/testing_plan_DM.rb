@@ -19,29 +19,7 @@ Perpetuity.data_source :postgres, 'data_mapper_app_development'
 #Traverse the Person hierarchy. As each team_member is visited, visit each of its referenced unshared Projects. As each
 # project is visited, perform a depth first search on its graph of documents. Return a count of the number of documents
 # visited when done./NO DEPTH FIRST SEARCH
-def traversal_1
 
-  all_people = Perpetuity[Person].select {|person| person.profile_type == "TeamMember" }.to_a
-  docs = 0
-  all_people.each do |person|
-    projects = []
-    team_member = Perpetuity[TeamMember].find(person.profile.id)
-    projects_team_members = Perpetuity[ProjectsTeamMember].select {|ptm| ptm.team_member.id == team_member.id}.to_a
-    Perpetuity[ProjectsTeamMember].load_association! projects_team_members, :projects
-
-    projects_team_members.each do |projtm|
-      projects << projtm.project
-    end
-    projects.each do |project|
-      documents = Perpetuity[Document].select {|document| document.project.id == project.id }.to_a
-      documents.each do |doc|
-        #visiting instead of returning the size
-        docs += 1
-      end
-    end
-  end
-  return docs
-end
 
 #Traversal T2: Traversal with updates***********************************************************************************
 #Repeat Traversal T1, but update objects during the traversal. There are three types of update patterns in this
@@ -161,12 +139,13 @@ def traversal_3
     projects.each do |project|
       documents = Perpetuity[Document].select {|document| document.project.id == project.id }.to_a
       documents.each do |doc|
-        #visiting instead of returning the size
-        doc_num += 1
-        type = doc.doc_type
-        name = doc.doc_name
-        doc.doc_type = name
-        doc.doc_name = type
+        doc_num+=1
+        day = doc.revision_date.mday
+        if day.odd?
+          doc.revision_date += 24*60*60
+        elsif day.even?
+          doc.revision_date -= 24*60*60
+        end
         Perpetuity[Document].save doc
       end
     end
@@ -178,6 +157,29 @@ end
 #Traverse the person hierarchy. As each team member is visited, visit each of its referenced unshared projects. As each
 # project is visited, visit the root document Return a count of the number of documents visited when done.
 
+def traversal_6
+
+  all_people = Perpetuity[Person].select {|person| person.profile_type == "TeamMember" }.to_a
+  docs = 0
+  all_people.each do |person|
+    projects = []
+    team_member = Perpetuity[TeamMember].find(person.profile.id)
+    projects_team_members = Perpetuity[ProjectsTeamMember].select {|ptm| ptm.team_member.id == team_member.id}.to_a
+    Perpetuity[ProjectsTeamMember].load_association! projects_team_members, :projects
+
+    projects_team_members.each do |projtm|
+      projects << projtm.project unless projects.include?(projtm.project)
+    end
+    projects.each do |project|
+      documents = Perpetuity[Document].select {|document| document.project.id == project.id }.to_a
+      documents.each do |doc|
+        #visiting instead of returning the size
+        docs += 1
+      end
+    end
+  end
+  return docs
+end
 #Traversals T8 and T9: Operations on Manual.
 #Traversal T8***********************************************************************************************************
 #Scans the address object, counting the number of occurrences of the character “I.”
@@ -398,9 +400,6 @@ end
 #puts traversal_2b
 #puts traversal_2c
 Benchmark.bm do |x|
-  x.report("DataMapper#traversal_1 \n") do
-    puts traversal_1
-  end
   x.report("DataMapper#traversal_2a \n") do
     puts traversal_2a
   end
@@ -412,6 +411,9 @@ Benchmark.bm do |x|
   end
   x.report("DataMapper#traversal_3 \n") do
     puts traversal_3
+  end
+  x.report("DataMapper#traversal_6 \n") do
+    puts traversal_6
   end
   x.report("DataMapper#traversal_8 \n") do
     puts traversal_8
@@ -441,10 +443,10 @@ Benchmark.bm do |x|
     puts query_8
   end
   x.report("DataMapper#modification_insert \n") do
-    puts modification_1_insert
+    modification_1_insert
   end
   x.report("DataMapper#modification_deletion \n") do
-    puts modification_2_deletion
+    modification_2_deletion
   end
 
 end
