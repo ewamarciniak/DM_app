@@ -17,7 +17,6 @@ class Company
 
   def validate!
     #place custom validations here e.g.
-    errors.add(:name, "cannot be blank.") if self.name = ""
-    errors.add(:number,"must be less than 7.") if self.number >= 7
+    errors.add(:company_name, "cannot be blank.") if self.company_name = ""
   end
 end

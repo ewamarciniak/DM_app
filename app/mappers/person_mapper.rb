@@ -10,4 +10,5 @@ Perpetuity.generate_mapper_for Person do
   attribute :updated_at, type: Time
 
   index :profile
+  index :company
 end

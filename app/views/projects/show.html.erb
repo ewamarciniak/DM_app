@@ -5,7 +5,11 @@
 <table>
   <tr>
     <td class="bold">Client:</td>
-    <td><%= link_to "#{@project.client.person.first_name} #{@project.client.person.last_name}/ #{@project.client.person.company.company_name}", @project.client %></td>
+    <% if @project.client %>
+        <td><%= link_to "#{@project.client.person.first_name} #{@project.client.person.last_name}/ #{@project.client.person.company.company_name}", @project.client %></td>
+    <% else %>
+        <td></td>
+    <% end %>
   </tr>
 
   <tr>

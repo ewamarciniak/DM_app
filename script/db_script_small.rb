@@ -220,3 +220,43 @@ random_indexes=[4, 15, 17, 15, 16, 13, 4, 15, 8, 11, 3, 11, 4, 6, 14, 0, 0, 13, 
       Perpetuity[ProjectsTeamMember].insert tm
     end
   end
+
+puts "________________________________________________________________________"
+puts "team_members done"
+
+  used_comp_ids = []
+  people =  Perpetuity[Person].all.to_a
+  Perpetuity[Person].load_association! people, :company
+  people.each do |pers|
+    used_comp_ids << pers.company.id
+  end
+  companies = Perpetuity[Company].all.to_a
+  company_ids = []
+  companies.each do |company|
+    company_ids << company unless used_comp_ids.include?(company.id)
+  end
+
+
+  CSV.foreach("script/small/clients.csv") do  |row|
+    client = Client.new
+    client.pref_method_of_contact = row[4]
+    client.pref_hours_of_contact= row[5]
+    client.created_at = Time.now
+    client.updated_at = Time.now
+    Perpetuity[Client].insert client
+
+    person = Person.new
+    person.first_name = row[0].strip
+    person.last_name = row[1]
+    person.phone_number = row[2]
+    person.email = row[3]
+    person.company = company_ids.pop
+    person.profile = client
+    person.profile_type = "Client"
+    person.created_at = Time.now
+    person.updated_at = Time.now
+    Perpetuity[Person].insert person
+  end
+
+  puts "________________________________________________________________________"
+  puts "clients done"

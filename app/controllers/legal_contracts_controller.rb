@@ -3,7 +3,7 @@ class LegalContractsController < ApplicationController
   # GET /legal_contracts.json
   def index
     @legal_contracts = Perpetuity[LegalContract].all
-
+    Perpetuity[LegalContract].load_association! @legal_contracts, :project
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: @legal_contracts }
@@ -14,7 +14,7 @@ class LegalContractsController < ApplicationController
   # GET /legal_contracts/1.json
   def show
     @legal_contract = Perpetuity[LegalContract].find(params[:id])
-
+    Perpetuity[LegalContract].load_association! @legal_contract, :project
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @legal_contract }

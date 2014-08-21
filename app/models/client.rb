@@ -6,4 +6,7 @@ class Client
     person.name_and_company
   end
 
+  def person
+    Perpetuity[Person].select { |person| person.profile.id == self.id}.to_a.first
+  end
 end

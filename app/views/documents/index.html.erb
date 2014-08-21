@@ -12,6 +12,7 @@
 
 <% @documents.each do |document| %>
   <tr>
+
     <td><%= link_to 'Project details', document.project %></td>
     <td><%= document.doc_type %></td>
     <td><%= document.revision_number %></td>

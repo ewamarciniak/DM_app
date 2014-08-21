@@ -3,7 +3,7 @@ class DocumentsController < ApplicationController
   # GET /documents.json
   def index
     @documents = Perpetuity[Document].all
-
+    Perpetuity[Document].load_association! @documents, :project
     respond_to do |format|
       format.html # index.html.erb
       format.json { render json: @documents }
@@ -14,7 +14,7 @@ class DocumentsController < ApplicationController
   # GET /documents/1.json
   def show
     @document = Perpetuity[Document].find(params[:id])
-
+    Perpetuity[Document].load_association! @document, :project
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: @document }
