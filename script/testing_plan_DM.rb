@@ -210,9 +210,8 @@ end
 #Generate 10 random Document ids; for each generated lookup the document with that id. Return the number of documents
 #processed when done.
 def query_1
-  #document_ids = Document.pluck(:id)
   document_ids = Perpetuity[Document].all.to_a.map(&:id)
-  index_num = [ 342, 876, 44, 299, 908, 112, 4, 77, 643, 999]
+  index_num = [ 42, 76, 44, 90, 8, 12, 4, 77, 43, 99]
   all_ids = []
   index_num.each do |num|
     all_ids << document_ids[num]
@@ -231,10 +230,9 @@ end
 #Choose a range for dates that will contain the last 1% of the dates found in the database's Documents. Retrieve the
 #Documents that satisfy this range predicate.
 def query_2
-  start_date = '2014-03-29'
+  start_date = '2014-03-30'
   end_date = '2014-08-05'
-  documents = Perpetuity[Document].select { |document| document.revision_date > start_date}.select { |document| document.revision_date < end_date}
-
+  documents = Perpetuity[Document].select { |document| document.revision_date.in (start_date.to_time..end_date.to_time)}
   return documents.to_a.size
 end
 
@@ -243,31 +241,32 @@ end
 # Documents that satisfy this range predicate.
 def query_3
   start_date = '2014-01-10'
-  end_date = '2014-01-20'
-  documents = Perpetuity[Document].select { |document| document.revision_date > start_date}.select { |document| document.revision_date < end_date}
+  end_date = '2014-01-18'
+  documents = Perpetuity[Document].select { |document| document.revision_date.in (start_date.to_time..end_date.to_time)}
   return documents.to_a.size
 end
 
 #Query Q4: path lookup**************************************************************************************************
 #Generate 100 random legal_contract titles. For each title generated, find all TeamMembers that use the project
 #corresponding to the legal_contract. Also, count the total number of team_members that qualify.
-
 def query_4
-  team_members_num = 0
-  team_members =[]
-  contracts = Perpetuity[LegalContract].all.to_a
-  Perpetuity[LegalContract].load_association! contracts, :project
-  projects = Perpetuity[Project].all.to_a
-  Perpetuity[Project].load_association! projects, :projects_team_members
-  proj_team_members = Perpetuity[ProjectsTeamMember].all.to_a
-  Perpetuity[ProjectsTeamMember].load_association! proj_team_members, :team_members
-  contracts.each do |contract|
-    ptms = Perpetuity[ProjectsTeamMember].select {|ptm| ptm.project.id == contract.project.id }.to_a
-    team_members_num += ptms.size
+  all_contracts =Perpetuity[LegalContract].all.sort(:created_at)
+  indexes = [0,18,2,4,1,15,3,17,16,19]
+  contracts =[]
+  10.times do
+    contracts << all_contracts[indexes.pop]
   end
-  return team_members_num
-end
 
+  team_members = []
+  contracts.each do |contract|
+    ptms = Perpetuity[ProjectsTeamMember].select{|ptm| ptm.project.id == contract.project.id }.to_a
+    ptms.each do |pt|
+      team_member = Perpetuity[TeamMember].select{|tm| tm.id == pt.team_member.id}.to_a
+      team_members << team_member
+    end
+  end
+  return team_members.size
+end
 #Query Q5: single-level make********************************************************************************************
 #Find all Team_members that use a project with a build date later than the build date of the team_member. Also, report
 #the number of qualifying team_members found.
@@ -287,6 +286,7 @@ def query_5
         relevant_team_members << pt.team_member
       end
     end
+
     return relevant_team_members.size
   end
 end
@@ -294,14 +294,8 @@ end
 #Query Q7***************************************************************************************************************
 #Scan all documents and return their ids
 def query_7
-  document_ids = []
-  documents = Perpetuity[Document].all.to_a
-  documents.each do |doc|
-    document_ids << doc.id
-  end
-  #puts document_ids.join(', ')
+  document_ids = Perpetuity[Document].select {|document| document.id}.to_a
   return document_ids.size
-
 end
 
 #Query Q8: ad-hoc join**************************************************************************************************
@@ -309,19 +303,14 @@ end
 #legal_contract. Also, return a count of the number of such pairs encountered.
 
 def query_8
-#no joins available
  contracts = Perpetuity[LegalContract].all.to_a
- documents = Perpetuity[Document].all.to_a
  Perpetuity[LegalContract].load_association! contracts, :project
   all_relevant_docs = []
-  all_relevant_docs_count = 0
   contracts.each do |contract|
     pairs = Perpetuity[Document].select {|doc| doc.contract_id == contract.id }
-    all_relevant_docs << pairs
-    all_relevant_docs_count +=pairs.to_a.count
-    #require 'debugger'; debugger
+    all_relevant_docs << pairs.to_a
   end
-  return all_relevant_docs_count
+  return all_relevant_docs.flatten.count
 end
 #STRUCTURAL MODIFICATIONS
 
@@ -340,7 +329,6 @@ def modification_1_insert
     projects << proj
   end
 
-  documents = []
   20.times do
     projects.each do |project|
       doc = Document.new
@@ -351,7 +339,6 @@ def modification_1_insert
       doc.revision_date = '2014-07-12'
 
       Perpetuity[Document].insert doc
-      documents << doc
     end
   end
 
@@ -365,12 +352,13 @@ def modification_1_insert
 
     Perpetuity[LegalContract].insert contract
   end
-  return projects
+  return projects.size
 end
 #Structural Modification 2: Delete**************************************************************************************
 #Delete the five newly created projects (and all of their associated documents and legal_contract objects).
+
 def modification_2_deletion
-  projects = modification_1_insert
+  projects = Perpetuity[Project].all.sort(:created_at).reverse.to_a[0..4]
   document_mapper = Perpetuity[Document]
   documents = document_mapper.all.to_a
   document_mapper.load_association! documents, :projects
@@ -400,53 +388,7 @@ end
 #puts traversal_2b
 #puts traversal_2c
 Benchmark.bm do |x|
-  x.report("DataMapper#traversal_2a \n") do
-    puts traversal_2a
-  end
-  x.report("DataMapper#traversal_2b \n") do
-    puts traversal_2b
-  end
-  x.report("DataMapper#traversal_2c \n") do
-    puts traversal_2c
-  end
-  x.report("DataMapper#traversal_3 \n") do
-    puts traversal_3
-  end
-  x.report("DataMapper#traversal_6 \n") do
-    puts traversal_6
-  end
-  x.report("DataMapper#traversal_8 \n") do
-    puts traversal_8
-  end
-  x.report("DataMapper#traversal_9 \n") do
-    puts traversal_9
-  end
-  x.report("DataMapper#query_1 \n") do
-    puts query_1
-  end
-  x.report("DataMapper#query_2 \n") do
-    puts query_2
-  end
-  x.report("DataMapper#query_3 \n") do
-    puts query_3
-  end
-  x.report("DataMapper#query_4 \n") do
-    puts query_4
-  end
-  x.report("DataMapper#query_5 \n") do
-    puts query_5
-  end
-  x.report("DataMapper#query_7 \n") do
-    puts query_7
-  end
   x.report("DataMapper#query_8 \n") do
     puts query_8
   end
-  x.report("DataMapper#modification_insert \n") do
-    modification_1_insert
-  end
-  x.report("DataMapper#modification_deletion \n") do
-    modification_2_deletion
-  end
-
 end

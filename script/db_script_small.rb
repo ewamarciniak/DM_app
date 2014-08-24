@@ -139,9 +139,6 @@ random_indexes=[4, 15, 17, 15, 16, 13, 4, 15, 8, 11, 3, 11, 4, 6, 14, 0, 0, 13, 
                 15, 0, 10, 13, 19, 19, 12, 4, 17, 15, 7, 18]
 
   projects = Perpetuity[Project].all.sort(:created_at).to_a
-
-  legal_contracts = Perpetuity[LegalContract].all.sort(:created_at).to_a
-  indexes = [10, 12, 4, 6, 3, 0, 2, 11, 14, 7]
   index_num = 0
   CSV.foreach("script/small/documents.csv") do  |row|
 
@@ -155,8 +152,11 @@ random_indexes=[4, 15, 17, 15, 16, 13, 4, 15, 8, 11, 3, 11, 4, 6, 14, 0, 0, 13, 
     doc.created_at = Time.now
     doc.updated_at = Time.now
     Perpetuity[Document].insert doc
+
     if index_num%100==0
-      doc.contract_id = legal_contracts[indexes.pop].id
+      the_project =  Perpetuity[Project].find(doc.project.id)
+      legal_contract = Perpetuity[LegalContract].select { |contract| contract.project.id == the_project.id}.to_a
+      doc.contract_id =legal_contract.first.id
     else
       doc.contract_id = "N/A"
     end
