@@ -12,14 +12,12 @@ require 'benchmark'
 DB_YML = "./config/database.yml"
 
 Perpetuity.data_source :postgres, 'data_mapper_app_development'
-#Perpetuity.logger = Logger.new(STDOUT)
-#TRAVERSALS
 
-#T1: Raw traversal speed************************************************************************************************
-#Traverse the Person hierarchy. As each team_member is visited, visit each of its referenced unshared Projects. As each
-# project is visited, perform a depth first search on its graph of documents. Return a count of the number of documents
-# visited when done./NO DEPTH FIRST SEARCH
-
+#***********************************************************************************************************************
+#*                                                                                                                     *
+#*                                                     TRAVERSALS                                                      *
+#*                                                                                                                     *
+#***********************************************************************************************************************
 
 #Traversal T2: Traversal with updates***********************************************************************************
 #Repeat Traversal T1, but update objects during the traversal. There are three types of update patterns in this
@@ -203,8 +201,11 @@ def traversal_9
   return num_occurances
 end
 
-
-#QUERIES
+#***********************************************************************************************************************
+#*                                                                                                                     *
+#*                                                     QUERIES                                                         *
+#*                                                                                                                     *
+#***********************************************************************************************************************
 
 #Query Q1: exact match lookup*******************************************************************************************
 #Generate 10 random Document ids; for each generated lookup the document with that id. Return the number of documents
@@ -267,6 +268,7 @@ def query_4
   end
   return team_members.size
 end
+
 #Query Q5: single-level make********************************************************************************************
 #Find all Team_members that use a project with a build date later than the build date of the team_member. Also, report
 #the number of qualifying team_members found.
@@ -312,7 +314,11 @@ def query_8
   end
   return all_relevant_docs.flatten.count
 end
-#STRUCTURAL MODIFICATIONS
+#***********************************************************************************************************************
+#*                                                                                                                     *
+#*                                                     MODIFICATIONS                                                   *
+#*                                                                                                                     *
+#***********************************************************************************************************************
 
 #Structural Modification 1: Insert**************************************************************************************
 #Create five new projects, which includes creating a number of new documents (100 in the small configuration, 1000 in
@@ -383,12 +389,53 @@ def modification_2_deletion
  return "deleted"
 end
 
-#puts traversal_1
-#puts traversal_2a
-#puts traversal_2b
-#puts traversal_2c
-Benchmark.bm do |x|
+Benchmark.bmbm do |x|
+  x.report("DataMapper#traversal_2a \n") do
+    puts traversal_2a
+  end
+  x.report("DataMapper#traversal_2b \n") do
+    puts traversal_2b
+  end
+  x.report("DataMapper#traversal_2c \n") do
+    puts traversal_2c
+  end
+  x.report("DataMapper#traversal_3 \n") do
+    puts traversal_3
+  end
+  x.report("DataMapper#traversal_6 \n") do
+    puts traversal_6
+  end
+  x.report("DataMapper#traversal_8 \n") do
+    puts traversal_8
+  end
+  x.report("DataMapper#traversal_9 \n") do
+    puts traversal_9
+  end
+  x.report("DataMapper#query_1 \n") do
+    puts query_1
+  end
+  x.report("DataMapper#query_2 \n") do
+    puts query_2
+  end
+  x.report("DataMapper#query_3 \n") do
+    puts query_3
+  end
+  x.report("DataMapper#query_4 \n") do
+    puts query_4
+  end
+  x.report("DataMapper#query_5 \n") do
+    puts query_5
+  end
+  x.report("DataMapper#query_7 \n") do
+    puts query_7
+  end
   x.report("DataMapper#query_8 \n") do
     puts query_8
+  end
+  x.report("DataMapper#modification_insert \n") do
+    puts modification_1_insert
+  end
+  x.report("DataMapper#modification_deletion \n") do
+    puts modification_2_deletion
   end
 end
