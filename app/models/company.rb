@@ -19,4 +19,5 @@ class Company
     #place custom validations here e.g.
     errors.add(:company_name, "cannot be blank.") if self.company_name = ""
   end
+
 end

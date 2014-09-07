@@ -10,4 +10,9 @@ class Person
     Perpetuity[Person].load_association! self, :company
     self.company
   end
+
+  def load_company
+    Perpetuity[Person].load_association! self, :company
+    self.company
+  end
 end
